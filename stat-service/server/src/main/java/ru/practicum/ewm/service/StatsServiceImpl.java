@@ -3,7 +3,7 @@ package ru.practicum.ewm.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.EndpointHit;
-import ru.practicum.ewm.dto.Stats;
+import ru.practicum.ewm.Stats;
 import ru.practicum.ewm.repository.StatsRepository;
 
 import java.time.LocalDateTime;

@@ -14,9 +14,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.Constants;
 import ru.practicum.ewm.EndpointHit;
-import ru.practicum.ewm.dto.Stats;
+import ru.practicum.ewm.Stats;
 import ru.practicum.ewm.service.StatsService;
 
+import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -45,6 +46,12 @@ public class StatsController {
                                 @RequestParam(required = false) List<String> uris,
                                 @RequestParam(defaultValue = "false") boolean unique) {
         log.info("Request to get stats");
+
+        if (end.isBefore(start)) {
+            log.info("Uncorrected format of dates start {} и end {}", start, end);
+
+            throw new InvalidParameterException("Uncorrected format of dates");
+        }
 
         if (unique) {
             return statsService.getUniqViewStatsList(start, end, uris);

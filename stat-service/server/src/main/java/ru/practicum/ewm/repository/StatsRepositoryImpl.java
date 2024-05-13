@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.EndpointHit;
-import ru.practicum.ewm.dto.Stats;
+import ru.practicum.ewm.Stats;
 
 @Repository
 public class StatsRepositoryImpl implements StatsRepository {
@@ -104,7 +104,7 @@ public class StatsRepositoryImpl implements StatsRepository {
         return Stats.builder()
                 .app(rs.getString("app"))
                 .uri(rs.getString("uri"))
-                .hits(rs.getInt("hits"))
+                .hits(rs.getLong("hits"))
                 .build();
     }
 }

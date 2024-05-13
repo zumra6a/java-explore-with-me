@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import ru.practicum.ewm.EndpointHit;
-import ru.practicum.ewm.dto.Stats;
+import ru.practicum.ewm.Stats;
 
 public interface StatsRepository {
     void save(EndpointHit hit);
