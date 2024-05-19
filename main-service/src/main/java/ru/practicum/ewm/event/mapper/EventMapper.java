@@ -1,5 +1,7 @@
 package ru.practicum.ewm.event.mapper;
 
+import java.util.Collections;
+
 import lombok.experimental.UtilityClass;
 import ru.practicum.ewm.category.mapper.CategoryMapper;
 import ru.practicum.ewm.event.dto.EventFullDto;
@@ -40,6 +42,8 @@ public class EventMapper {
                 .requestModeration(event.isRequestModeration())
                 .state(event.getEventStatus())
                 .title(event.getTitle())
+                .views(0L)
+                .comments(Collections.emptyList())
                 .build();
     }
 
@@ -52,6 +56,8 @@ public class EventMapper {
                 .initiator(UserMapper.toUserShortDto(event.getInitiator()))
                 .paid(event.isPaid())
                 .title(event.getTitle())
+                .views(0L)
+                .comments(0L)
                 .build();
     }
 }

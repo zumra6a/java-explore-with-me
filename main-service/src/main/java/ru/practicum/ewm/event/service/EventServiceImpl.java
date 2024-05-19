@@ -15,6 +15,10 @@ import ru.practicum.ewm.StatsClient;
 import ru.practicum.ewm.Stats;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.comment.mapper.CommentMapper;
+import ru.practicum.ewm.comment.model.Comment;
+import ru.practicum.ewm.comment.model.EventCommentCount;
+import ru.practicum.ewm.comment.repository.CommentRepository;
 import ru.practicum.ewm.event.SortType;
 import ru.practicum.ewm.event.dto.CaseUpdatedStatusDto;
 import ru.practicum.ewm.event.dto.EventFullDto;
@@ -60,6 +64,7 @@ public class EventServiceImpl implements EventService {
     private final StatsClient statsClient;
     private final RequestRepository requestRepository;
     private final LocationRepository locationRepository;
+    private final CommentRepository commentRepository;
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -70,6 +75,7 @@ public class EventServiceImpl implements EventService {
             StatsClient statsClient,
             RequestRepository requestRepository,
             LocationRepository locationRepository,
+            CommentRepository commentRepository,
             ObjectMapper objectMapper) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
@@ -77,6 +83,7 @@ public class EventServiceImpl implements EventService {
         this.statsClient = statsClient;
         this.requestRepository = requestRepository;
         this.locationRepository = locationRepository;
+        this.commentRepository = commentRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -433,6 +440,8 @@ public class EventServiceImpl implements EventService {
 
         List<Event> resultEvents = eventRepository.findAll(specification, pageable).getContent();
         Map<Long, Long> viewStatsMap = getViewsAllEvents(resultEvents);
+        Map<Long, Long> eventCommentsCountMap = countCommentsAllEvents(resultEvents);
+
         List<EventShortDto> result = resultEvents
                 .stream()
                 .map(EventMapper::toEventShortDto)
@@ -440,7 +449,10 @@ public class EventServiceImpl implements EventService {
 
         for (EventShortDto event : result) {
             Long viewsFromMap = viewStatsMap.getOrDefault(event.getId(), 0L);
+            Long eventCommentsCountFromMap = eventCommentsCountMap.getOrDefault(event.getId(), 0L);
+
             event.setViews(viewsFromMap);
+            event.setComments(eventCommentsCountFromMap);
         }
 
         return result;
@@ -459,6 +471,12 @@ public class EventServiceImpl implements EventService {
         Map<Long, Long> viewStatsMap = getViewsAllEvents(List.of(event));
         Long views = viewStatsMap.getOrDefault(event.getId(), 0L);
         eventFullDto.setViews(views);
+
+        List<Comment> comments = commentRepository.findAllByEvent_Id(eventId);
+        eventFullDto.setComments(comments
+                .stream()
+                .map(CommentMapper::toCommentResponseDto)
+                .collect(Collectors.toList()));
 
         return eventFullDto;
     }
@@ -494,6 +512,21 @@ public class EventServiceImpl implements EventService {
         }
 
         return viewStatsMap;
+    }
+
+    private Map<Long, Long> countCommentsAllEvents(List<Event> resultEvents) {
+        List<EventCommentCount> commentsCountMap = commentRepository.countCommentByEvent(
+                resultEvents
+                        .stream()
+                        .map(Event::getId)
+                        .collect(Collectors.toList()));
+
+        return commentsCountMap
+                .stream()
+                .collect(Collectors.toMap(
+                        EventCommentCount::getEventId,
+                        EventCommentCount::getCount
+                ));
     }
 
     private CaseUpdatedStatusDto updatedStatusConfirmed(Event event, CaseUpdatedStatusDto caseUpdatedStatus,
